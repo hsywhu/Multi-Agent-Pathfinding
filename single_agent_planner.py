@@ -99,8 +99,15 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     #               by time step, see build_constraint_table.
 
     # check if next_time is within the max timestep of constraint_table
-    if next_time > len(constraint_table) - 1:
+    # if next_time > len(constraint_table) - 1:
+    #     return False
+
+    # Task 2.3 Adding Additional Constraints
+    # adds additional constraints that apply not only to the time step when agents reach their goal locations but
+    # also to all future time steps
+    if len(constraint_table) == 0:
         return False
+    next_time = min(next_time, len(constraint_table) - 1)
 
     for constraint in constraint_table[next_time]:
         # handle vertex constraint
@@ -142,6 +149,9 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     open_list = []
     closed_list = dict()
 
+    # Task 2.4: Set an upper bound on the path length
+    timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 5
+
     # calculate earliest goal timestep from the constraint table
     earliest_goal_timestep = 0
     for i in range(len(constraint_table) - 1, -1, -1):
@@ -155,6 +165,12 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     closed_list[(root['loc'], root['timestep'])] = root
     while len(open_list) > 0:
         curr = pop_node(open_list)
+
+        # Task 2.4: check if the current move has exceeded the upper bould
+        if curr['timestep'] > timestep_upper_bound:
+            print('Timestep exceeded the upper bound')
+            return None
+
         #############################
         # Task 1.4: Adjust the goal test condition to handle goal constraints
         if curr['loc'] == goal_loc and curr['timestep'] >= earliest_goal_timestep:

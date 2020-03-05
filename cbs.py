@@ -21,8 +21,7 @@ def detect_collisions(paths):
     #           A collision can be represented as dictionary that contains the id of the two robots, the vertex or edge
     #           causing the collision, and the timestep at which the collision occurred.
     #           You should use your detect_collision function to find a collision between two robots.
-
-    pass
+    print(paths)
 
 
 def standard_splitting(collision):
