@@ -51,6 +51,7 @@ def disjoint_splitting(collision):
 
     pass
 
+
 def paths_violate_constraint(constraint, paths):
     assert constraint['positive'] is True
     rst = []
@@ -67,6 +68,7 @@ def paths_violate_constraint(constraint, paths):
                     or constraint['loc'] == [curr, prev]:
                 rst.append(i)
     return rst
+
 
 class CBSSolver(object):
     """The high-level search of CBS."""
