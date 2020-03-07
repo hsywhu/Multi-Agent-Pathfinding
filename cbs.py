@@ -60,17 +60,16 @@ def standard_splitting(collision):
         # if length of loc is 1 then process as vertex collision
         res = [
             {'agent': collision['a1'], 'loc': collision['loc'], 'timestep': collision['timestep']},
-            {'agent': collision['a2'], 'loc': collision['loc'], 'timestep': collision['timestep']},
+            {'agent': collision['a2'], 'loc': collision['loc'], 'timestep': collision['timestep']}
         ]
         return res
-    # process as edge collision
+    # if not vertex collision then process as edge collision
     reversed_loc = [collision['loc'][1], collision['loc'][0]]
     res = [
         {'agent': collision['a1'], 'loc': collision['loc'], 'timestep': collision['timestep']},
         {'agent': collision['a2'], 'loc': reversed_loc, 'timestep': collision['timestep']}
     ]
     return res
-
 
 
 def disjoint_splitting(collision):
@@ -185,8 +184,33 @@ class CBSSolver(object):
         #                standard_splitting function). Add a new child node to your open list for each constraint
         #           Ensure to create a copy of any objects that your child nodes might inherit
 
+        while len(self.open_list) > 0:
+            P = self.pop_node()
+            # if this node has no collision, return solution
+            if len(P['collisions']) == 0:
+                self.print_results(P)
+                return P['paths']
+            # else convert the first collision to a list of constraints
+            collision = P['collisions'][0]
+            constraints = standard_splitting(collision)
+            for constraint in constraints:
+                Q = {'cost': 0, 'constraints': P['constraints'].copy(), 'paths': [], 'collisions': []}
+                # shallow copy constriants of P and add the new constraint
+                Q['constraints'].append(constraint)
+                # shallow copy paths of P
+                Q['paths'] = P['paths'].copy()
+                agent_idx = constraint['agent']
+                path = a_star(
+                    self.my_map, self.starts[agent_idx], self.goals[agent_idx], self.heuristics[agent_idx], agent_idx, Q['constraints'])
+                if path is not None:
+                    Q['paths'][agent_idx] = path
+                    Q['collisions'] = detect_collisions(Q['paths'])
+                    Q['cost'] = get_sum_of_cost(Q['paths'])
+                    self.push_node(Q)
+
         self.print_results(root)
         return root['paths']
+        # raise BaseException('No solutions')
 
 
     def print_results(self, node):

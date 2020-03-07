@@ -99,15 +99,15 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     #               by time step, see build_constraint_table.
 
     # check if next_time is within the max timestep of constraint_table
-    # if next_time > len(constraint_table) - 1:
-    #     return False
+    if next_time > len(constraint_table) - 1:
+        return False
 
     # Task 2.3 Adding Additional Constraints
     # adds additional constraints that apply not only to the time step when agents reach their goal locations but
     # also to all future time steps
-    if len(constraint_table) == 0:
-        return False
-    next_time = min(next_time, len(constraint_table) - 1)
+    # if len(constraint_table) == 0:
+    #     return False
+    # next_time = min(next_time, len(constraint_table) - 1)
 
     for constraint in constraint_table[next_time]:
         # handle vertex constraint
