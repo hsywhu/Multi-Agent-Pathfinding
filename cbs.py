@@ -56,7 +56,21 @@ def standard_splitting(collision):
     #                          specified timestep, and the second constraint prevents the second agent to traverse the
     #                          specified edge at the specified timestep
 
-    pass
+    if len(collision['loc']) == 1:
+        # if length of loc is 1 then process as vertex collision
+        res = [
+            {'agent': collision['a1'], 'loc': collision['loc'], 'timestep': collision['timestep']},
+            {'agent': collision['a2'], 'loc': collision['loc'], 'timestep': collision['timestep']},
+        ]
+        return res
+    # process as edge collision
+    reversed_loc = [collision['loc'][1], collision['loc'][0]]
+    res = [
+        {'agent': collision['a1'], 'loc': collision['loc'], 'timestep': collision['timestep']},
+        {'agent': collision['a2'], 'loc': reversed_loc, 'timestep': collision['timestep']}
+    ]
+    return res
+
 
 
 def disjoint_splitting(collision):
