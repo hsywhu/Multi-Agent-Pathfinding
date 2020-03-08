@@ -150,10 +150,10 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
     closed_list = dict()
 
     # Task 2.4: Set an upper bound on the path length
-    # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 3
+    timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 3
     # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 10
     # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * (1 + agent)
-    timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 20
+    # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 20
 
     # calculate earliest goal timestep from the constraint table
     earliest_goal_timestep = 0

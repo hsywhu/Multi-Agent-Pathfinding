@@ -29,7 +29,6 @@ def detect_collision(path1, path2):
         timestep += 1
 
 
-
 def detect_collisions(paths):
     ##############################
     # Task 3.1: Return a list of first collisions between all robot pairs.
@@ -43,7 +42,6 @@ def detect_collisions(paths):
             if temp_collision is not None:
                 res.append({'a1': a1_idx, 'a2': a2_idx, 'loc': temp_collision[0], 'timestep': temp_collision[1]})
     return res
-
 
 
 def standard_splitting(collision):
