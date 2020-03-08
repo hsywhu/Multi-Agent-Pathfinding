@@ -52,7 +52,7 @@ def build_constraint_table(constraints, agent):
     ##############################
     # Task 1.2/1.3: Return a table that constains the list of constraints of
     #               the given agent for each time step. The table can be used
-    #               for a more efficient constraint violation check in the 
+    #               for a more efficient constraint violation check in the
     #               is_constrained function.
 
     # find the biggest timestep first
@@ -177,6 +177,10 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
             return get_path(curr)
         for dir in range(5):
             child_loc = move(curr['loc'], dir)
+            # check if the new loc is within the map
+            if child_loc[0] < 0 or child_loc[1] < 0 or child_loc[0] >= len(my_map) or child_loc[1] >= len(my_map[0]):
+                continue
+            # check if the new loc on the map is available
             if my_map[child_loc[0]][child_loc[1]]:
                 continue
             # check if the new loc satisfies the constraints
