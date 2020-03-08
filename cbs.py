@@ -81,7 +81,27 @@ def disjoint_splitting(collision):
     #                          specified edge at the specified timestep
     #           Choose the agent randomly
 
-    pass
+    rand_choice = random.randint(0, 1)
+    if rand_choice == 0:
+        res = [
+            {'agent': collision['a1'], 'loc': collision['loc'], 'timestep': collision['timestep'], 'positive': True},
+            {'agent': collision['a1'], 'loc': collision['loc'], 'timestep': collision['timestep'], 'positive': False}
+        ]
+        return res
+    else:
+        if len(collision['loc']) == 1:
+            res = [
+                {'agent': collision['a2'], 'loc': collision['loc'], 'timestep': collision['timestep'], 'positive': True},
+                {'agent': collision['a2'], 'loc': collision['loc'], 'timestep': collision['timestep'], 'positive': False}
+            ]
+            return res
+        else:
+            reversed_loc = [collision['loc'][1], collision['loc'][0]]
+            res = [
+                {'agent': collision['a2'], 'loc': reversed_loc, 'timestep': collision['timestep'], 'positive': True},
+                {'agent': collision['a2'], 'loc': reversed_loc, 'timestep': collision['timestep'], 'positive': False}
+            ]
+            return res
 
 
 def paths_violate_constraint(constraint, paths):
@@ -190,26 +210,36 @@ class CBSSolver(object):
                 return P['paths']
             # else convert the first collision to a list of constraints
             collision = P['collisions'][0]
-            constraints = standard_splitting(collision)
+            # constraints = standard_splitting(collision)
+            constraints = disjoint_splitting(collision)
             for constraint in constraints:
                 Q = {'cost': 0, 'constraints': P['constraints'].copy(), 'paths': [], 'collisions': []}
-                # shallow copy constriants of P and add the new constraint
+                # shallow copy constraints of P and add the new constraint
                 Q['constraints'].append(constraint)
                 # shallow copy paths of P
                 Q['paths'] = P['paths'].copy()
                 agent_idx = constraint['agent']
-                path = a_star(
-                    self.my_map, self.starts[agent_idx], self.goals[agent_idx], self.heuristics[agent_idx], agent_idx, Q['constraints'])
+                path = a_star(self.my_map, self.starts[agent_idx], self.goals[agent_idx], self.heuristics[agent_idx], agent_idx, Q['constraints'])
                 if path is not None:
                     Q['paths'][agent_idx] = path
-                    Q['collisions'] = detect_collisions(Q['paths'])
-                    Q['cost'] = get_sum_of_cost(Q['paths'])
-                    self.push_node(Q)
-
-        self.print_results(root)
-        return root['paths']
-        # raise BaseException('No solutions')
-
+                    flag = False
+                    if constraint['positive']:
+                        violate_agents = paths_violate_constraint(constraint, Q['paths'])
+                        for violate_agent_idx in violate_agents:
+                            Q['constraints'].append({'agent': violate_agent_idx, 'loc': constraint['loc'], 'timestep': constraint['timestep'], 'positive': False})
+                            temp_path = a_star(self.my_map, self.starts[violate_agent_idx], self.goals[violate_agent_idx], self.heuristics[violate_agent_idx], violate_agent_idx, Q['constraints'])
+                            if temp_path is not None:
+                                Q['paths'][violate_agent_idx] = temp_path
+                            else:
+                                flag = True
+                                break
+                    if not flag:
+                        Q['collisions'] = detect_collisions(Q['paths'])
+                        Q['cost'] = get_sum_of_cost(Q['paths'])
+                        self.push_node(Q)
+        # self.print_results(root)
+        # return root['paths']
+        raise BaseException('No solutions')
 
     def print_results(self, node):
         print("\n Found a solution! \n")

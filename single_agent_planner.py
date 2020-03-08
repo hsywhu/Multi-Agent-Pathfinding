@@ -58,7 +58,7 @@ def build_constraint_table(constraints, agent):
     # find the biggest timestep first
     biggest_timestep = -1
     for constraint in constraints:
-        if constraint['agent'] == agent and constraint['timestep'] > biggest_timestep:
+        if constraint['timestep'] > biggest_timestep:
             biggest_timestep = constraint['timestep']
 
     # init the constraint table with the length of biggest timestep
@@ -68,8 +68,24 @@ def build_constraint_table(constraints, agent):
 
     # fill in the constraint table
     for constraint in constraints:
-        if constraint['agent'] == agent:
-            constraint_table[constraint['timestep']].append(constraint['loc'])
+        if constraint['positive']:
+            if len(constraint['loc']) == 1:
+                # process as positive vertex constraint
+                if constraint['agent'] == agent:
+                    constraint_table[constraint['timestep']].append({'loc': constraint['loc'], 'positive': True})
+                else:
+                    constraint_table[constraint['timestep']].append({'loc': constraint['loc'], 'positive': False})
+            else:
+                # process as positive edge constraint
+                if constraint['agent'] == agent:
+                    constraint_table[constraint['timestep']].append({'loc': constraint['loc'], 'positive': True})
+                else:
+                    constraint_table[constraint['timestep']].append({'loc': constraint['loc'], 'positive': False})
+        else:   # negative constraint
+            if constraint['agent'] == agent:
+                constraint_table[constraint['timestep']].append({'loc': constraint['loc'], 'positive': False})
+            # else:
+            #     constraint_table[constraint['timestep']].append({'loc': constraint['loc'], 'positvie': False})
     return constraint_table
 
 
@@ -110,12 +126,16 @@ def is_constrained(curr_loc, next_loc, next_time, constraint_table):
     next_time = min(next_time, len(constraint_table) - 1)
 
     for constraint in constraint_table[next_time]:
-        # handle vertex constraint
-        if len(constraint) == 1 and constraint[0] == next_loc:
+        # process positive constraint first
+        if constraint['positive'] and constraint['loc'][0] == next_loc:
             return True
-        # handle edge constraint
-        elif len(constraint) == 2 and constraint[0] == curr_loc and constraint[1] == next_loc:
-            return True
+        elif not constraint['positive']:    # negative constraint
+            # handle vertex constraint
+            if len(constraint['loc']) == 1 and constraint['loc'][0] == next_loc:
+                return True
+            # handle edge constraint
+            elif len(constraint['loc']) == 2 and constraint['loc'][0] == curr_loc and constraint['loc'][1] == next_loc:
+                return True
     return False
 
 
@@ -151,9 +171,6 @@ def a_star(my_map, start_loc, goal_loc, h_values, agent, constraints):
 
     # Task 2.4: Set an upper bound on the path length
     timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 3
-    # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 10
-    # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * (1 + agent)
-    # timestep_upper_bound = len(my_map[0]) * len(my_map[1]) * 20
 
     # calculate earliest goal timestep from the constraint table
     earliest_goal_timestep = 0
